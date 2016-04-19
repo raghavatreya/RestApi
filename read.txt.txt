@@ -1,0 +1,5 @@
+->src --> vendor --> slim --> slim --> example --> all useful files
+
+DOCUMENT_master is working as update the document.
+update the name of the document will be same.You can change the content of file. tag and author can be change.()
+.

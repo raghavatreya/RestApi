@@ -1,0 +1,14 @@
+What's included?
+
+When exploring the application, these are the key files to look at.
+
+index.php instantiates the Slim application object, sets the application up using files in app/ and runs it.
+app/dependencies.php contains all the dependencies that are registered with Pimple.
+app/middleware.php is where you should register any application middleware that you want to use. It's empty in the skeleton.
+app/routes.php contains all the routes that the application responds to. I like having them all in one place and to keep the file sensible, I use the DIC to grab the action for dispatch.
+app/src/Action/HomeAction.php is the class that is loaded by the DIC and then the dispatch method is executed. The nice thing about having a class like this is that I can load the dependencies via the constructor. Look in dependencies.php for the factory for this class.
+app/templates/home.twig is the Twig view script that is rendered.
+
+
+dected the mobile
+http://marketblog.envato.com/tips/detecting-mobile-devices-php/

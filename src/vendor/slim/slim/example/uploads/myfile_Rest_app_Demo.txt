@@ -1,0 +1,122 @@
+
+/*-------------------------------DOWNLOAD THE FILE WITH GIVEN FILENAME-----------------*/
+// File will be download is the browser is not supportable
+$app->get('/downloadDocument/{filename}',function(Request $request, Response $response, $args){
+	$path = $args['filename'];
+	
+	//retriveFile_or_Download($path, $a, $response);	
+	global $targetDir;
+	$targetFilePath = $targetDir.$path;
+	$a = "attachment; ";
+	if(file_exists($targetFilePath)){
+		$pathParts = pathinfo($targetFilePath);
+		$extension = strtolower($pathParts["extension"]);
+		$mime = getExtension($extension);
+		$response = $response->withHeader('Content-Type:',$mime);
+		$response = $response->withHeader('Content-Disposition', $a.'filename="'.basename($targetFilePath).'"');
+		$response = $response->withHeader('Content-Description:', 'File Transfer');
+		$response = $response->withHeader('Expires','0');
+		$response = $response->withHeader('Cache-Control',' must-revalidate');
+		//$response = $response->withHeader('Pragma','public');
+		$response = $response->withHeader('Content-Length',filesize($targetFilePath));
+		$response = $response->withStatus(200);
+		readfile($targetFilePath);
+	}else{
+		$response = $response->withJson(array("status" => "error", "message" => "Content not found"), 404);
+	}
+	return $response;
+});
+
+
+
+
+/* Add Document to the database file upload allowed*/
+/*POST PARAMS*/
+$app->post('/addDocument', function (Request $request, Response $response){
+	global $targetDir;
+	$data = $request->getParsedBody();
+
+	$keywords = filter_var($data['keywords'], FILTER_SANITIZE_STRING);
+	$keywords = explode(',',$keywords);//divides the string into array of string each containing a keyword or an empty string
+	$requiredParams = array("keywords");
+	//verifyRequiredParams($requiredParams, $data, $response);
+	
+	
+	/*-------------FILE UPLOAD HANDLING-------------*/
+	/*------------FILE PATH : ../../uploads/--------*/
+	if(isset($_FILES["file"]["error"])){
+		$targetFilePath = $targetDir . basename($_FILES["file"]["name"]);
+		$fileType = $_FILES["file"]["type"];
+		$targetFileName = pathinfo($targetFilePath,PATHINFO_FILENAME);
+		$fileExtension = pathinfo($targetFilePath,PATHINFO_EXTENSION);
+		
+		//checks if the file already exists if already exists in the upload folder then the same absolute path name will be stored in the database
+		if(!file_exists($targetFilePath))
+			move_uploaded_file($_FILES["file"]["tmp_name"],$targetFilePath);
+		$response = $response->withJson(array("status" => "success", "message" => "file upload success"), 201);
+		
+	}else{
+		$response = $response->withJson(array("status" => "error", "message" => "No file sent to server"));
+		return $response;	
+	}
+	/*---------------------- FILE UPLOAD HANDLING ENDS-------------*/
+
+	
+	try 
+    {
+        $db = getDB();
+		$sql = "SELECT COUNT(*) FROM main WHERE name=:name AND extension=:extension";
+		$param = array(':name' => $targetFileName, ':extension' => $fileExtension);
+		$stmt = $db->prepare($sql);
+		$stmt->execute($param);
+		if($stmt->fetchColumn() == 0)
+		{
+			//Will insert into main table 
+			$sql = "INSERT INTO main (name,type,extension,creation_date) VALUES(:name,:type,:extension,NOW())";
+			$param = array(':name' => $targetFileName, ':type' => $fileType, ':extension' => $fileExtension);
+			$stmt = $db->prepare($sql);
+			$stmt->execute($param);
+			$main_id = $db->lastInsertId();
+			//echo 'main_id : '.$db->lastInsertId();//Required to obtain id of the row in main table
+			
+			
+			//will insert keywords into keyword table if not present
+			foreach($keywords as $keyword){
+				$keyword = preg_replace('/\s+/','',$keyword);
+				//checks if any of the element of keyword  array is empty or not 
+				if($keyword != ''){
+					//searches in the keyword database for this keyword
+					$sql = "SELECT id FROM keyword WHERE keyword=:keyword";
+					$param = array(':keyword' => $keyword);
+					$stmt = $db->prepare($sql);
+					$stmt->execute($param);
+					$keyword_id = $stmt->fetchColumn(0);//obtain the id of the $keyword
+					
+					if($keyword_id == 0){
+						//keyword not present so insert it in the table
+						$sql = "INSERT INTO keyword (keyword) VALUES(:keyword)";
+						$param = array(':keyword' => $keyword);
+						$stmt = $db->prepare($sql);
+						$stmt->execute($param);
+						$keyword_id = $db->lastInsertId(); //obtain the id of the inserted keyword
+					}
+					
+					//insert the main_id and keyword_id into the link table
+					$sql = "INSERT into link (main_id,keyword_id) VALUES(:main_id,:keyword_id)";
+					$param = array(':main_id' => $main_id, ':keyword_id' => $keyword_id);
+					$stmt = $db->prepare($sql);
+					$result = $stmt->execute($param);
+				}
+			}
+	 
+			$response = $response->withJson(array("status" => "success", "message" => "Resource created successfully"),201);
+			$db = null;
+		}else{
+			$response = $response->withJson(array("status" => "error", "message" => "The file already exists"),400);
+		}
+    } catch(PDOException $e) {
+		$response = $response->withJson(array("status" => "error", "message" => $e->getMessage()), 404);
+    }
+	
+	return $response;
+}); 

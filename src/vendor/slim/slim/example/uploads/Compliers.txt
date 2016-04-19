@@ -1,0 +1,22 @@
+Ambigutiy Problem is undecideable we have to try all possibility.
+Guess and solve the problem
+(2^3)^4
+make it right associative.
+f=g^f|g
++ and * make them left associative.
+and or boolean make them left associative
+not make them right associative.
+sum product and kleen closure of two expresssion
+$ is left associative.
+# is left recursevive.
+Left recursion and right recursion.
+A = Aa | b
+A is calling itself and doing somework a.
+Top Down Parser does not work with left recursive grammer.
+ambigus and unambigus 
+determistic A = aB1 | aB2  | aB3 and nondeterminstic
+left recursive  and right recursive
+left factoring proccess in this process we have to take decision at the base of beta1,beta2,beta3
+on sceing enough postpone the decision making step
+A = aA'
+A'=B1 | B2 | B3

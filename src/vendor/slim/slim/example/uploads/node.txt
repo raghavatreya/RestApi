@@ -1,0 +1,14 @@
+Ryan Dahl
+Process is global variable.
+setTimeout(function(){
+console.log("World!");
+},2000);
+console.log("hello");
+your never ever stop in node.
+in php echo hello sleep
+where as in node cpu goes to zero.
+node exit when nothing to do.
+node handle concurency well it allow more and more stuff to be done at 
+exception server
+remove dead socketss form array
+debugging edge for node.

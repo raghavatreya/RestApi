@@ -1,0 +1,62 @@
+<div ng-app="homeApp" ng-controller="admin_ctrl" class="container">
+			<div class="row">
+						<div class="col-sm-2 col-xs-4 col-md-3">
+							
+						</div>
+						<div class="col-sm-8 col-xs-6 col-md-8">
+						 
+						        <h1>Admin Page</h1>
+						        <input type="text"  ng-model="key">
+						        <!---<BUTTON ng-click="getResult()">Search</BUTTON> -->
+						      
+						</div>
+						<div class="col-sm-2 col-xs-2 col-md-1">
+							
+						</div>
+
+
+			</div>
+
+			<div class="row">
+				<div class="col-sm-2 col-xs-4 col-md-3">
+							
+						</div>
+						<div class="col-sm-8 col-xs-6 col-md-8" >
+						 
+						 		<select ng-model="type">
+									  <option value="all">All</option>
+									  <option value="pdf">Pdf</option>
+									  <option value="image">Image</option>
+									  <option value="ppt">Ppt</option>
+								</select>
+						        <BUTTON ng-click="getResult()">Search</BUTTON>
+						      
+						</div>
+						<div class="col-sm-2 col-xs-2 col-md-1">
+							
+						</div>
+			</div>
+			<div style="margin-top:30px;" class="row"   ng-repeat="doc in documents">
+						<div class="col-sm-2 col-xs-4 col-md-3">
+							
+						</div>
+						<div class="col-sm-8 col-xs-6 col-md-8" >
+					    	 File Name :-{{doc.name}}
+					     <div class="row">
+					     <div class="col-sm-6">
+					     	<a ng-href="http://localhost/testrest/src/vendor/slim/slim/example/api/download/{{doc.name}}" > Download </a>
+					     </div>
+					     
+					     <div class="col-sm-6">
+					     	
+					     	<button ng-click="deleteDoc(doc.name)">Delete</button>
+					     	
+					     </div>
+					     </div>
+					     
+					    </div>
+					  <div class="col-sm-2 col-xs-2 col-md-1">
+					 <!-- <button onclick="getdelete({{doc.name}})" >Delete</button>-->
+					  </div>
+			</div>
+</div>
